@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHAHIN KING MOD</title>
+    <!-- Load Share Tech Mono Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Theme Variables and Global Styles */
+        :root {
+            --bg: #000000;
+            --neon: #00ff66; /* Neon Green */
+            --accent: #ff00ff; /* Neon Pink/Magenta */
+            --header-height: 72px;
+            --panel-width: 220px;
+            --panel-height: 240px;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--bg);
+            color: var(--neon);
+            margin: 0;
+            overflow: hidden; /* Prevent body scroll */
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* 2. Layout: Top Bar and Iframe Container */
+        #top-bar {
+            height: var(--header-height);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-bottom: 2px solid var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            position: relative;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        #iframe-container {
+            flex-grow: 1;
+        }
+
+        #main-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Vertical Brand Text (Left) */
+        #brand-text {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%) rotate(-90deg);
+            transform-origin: left top;
+            font-size: 1.2rem;
+            color: var(--neon);
+            text-shadow: 0 0 5px var(--neon);
+            opacity: 0.5;
+            letter-spacing: 5px;
+            z-index: 101;
+            padding-left: 10px;
+        }
+
+        /* 2. Layout: HACK ON Button */
+        .neon-button {
+            padding: 10px 30px;
+            background: transparent;
+            color: var(--neon);
+            border: 2px solid var(--neon);
+            border-radius: 8px;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon), inset 0 0 10px var(--neon);
+            transition: all 0.3s ease-in-out;
+            text-shadow: 0 0 4px var(--neon);
+        }
+
+        .neon-button:hover {
+            background-color: rgba(0, 255, 102, 0.1);
+            box-shadow: 0 0 20px var(--neon), inset 0 0 20px var(--neon);
+        }
+
+        .neon-button:active {
+            box-shadow: 0 0 5px var(--neon), inset 0 0 5px var(--neon);
+            transform: scale(0.98);
+        }
+        
+        /* 3. Floating Panel */
+        #floating-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: var(--panel-width);
+            height: var(--panel-height);
+            background-color: rgba(10, 0, 10, 0.95);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 15px var(--accent), /* Outer shadow */
+                0 0 50px rgba(255, 0, 255, 0.5); /* Drop shadow */
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            touch-action: none; /* Essential for smooth touch dragging */
+            z-index: 1000;
+            transition: opacity 0.2s;
+            cursor: grab;
+            display: none; /* Hidden by default */
+        }
+        
+        #floating-panel.visible {
+            display: flex;
+        }
+
+        /* Inner Glow Effect */
+        #floating-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid rgba(255, 0, 255, 0.5);
+            border-radius: 12px;
+            box-shadow: inset 0 0 8px var(--accent);
+            pointer-events: none;
+        }
+
+        /* Small Screen Responsiveness */
+        @media (max-width: 420px) {
+            :root {
+                --panel-width: 200px;
+                --panel-height: 220px;
+            }
+            #brand-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 4. Inside Panel Elements */
+        #panel-header {
+            color: var(--accent);
+            text-shadow: 0 0 5px var(--accent);
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed rgba(255, 0, 255, 0.3);
+            width: 90%;
+            text-align: center;
+        }
+
+        #content-area {
+            position: relative;
+            flex-grow: 1;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Particle Canvas Background */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.4;
+        }
+
+        /* Countdown and Result Display */
+        #countdown-svg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            max-width: 120px;
+            max-height: 120px;
+            z-index: 2;
+        }
+
+        /* Countdown Ring Style */
+        .countdown-ring {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            stroke: var(--neon);
+            transition: stroke 0.1s;
+        }
+
+        #result-display {
+            position: relative;
+            font-size: 2rem;
+            font-weight: bold;
+            z-index: 3;
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.5s;
+            font-family: 'Share Tech Mono', monospace; /* Ensure font is applied */
+        }
+
+        /* Dynamic Result Colors and Glows - INCREASED BRIGHTNESS */
+        .result-glow {
+            animation: pulse-glow 1.5s infinite ease-in-out;
+            transition: color 0.2s, text-shadow 0.2s; /* Smooth color change */
+            /* Increased text-shadow for brighter glow */
+            text-shadow: 0 0 15px currentColor, 0 0 30px currentColor, 0 0 45px currentColor;
+        }
+        @keyframes pulse-glow {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .error-glow {
+            color: #ff0000; /* Bright red for error */
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000; /* Increased glow */
+            animation: pulse-glow 1.5s infinite ease-in-out;
+        }
+
+
+        /* 5. Buttons Row */
+        #panel-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 5px 0 0 0;
+        }
+
+        #panel-buttons button {
+            flex: 1;
+            margin: 0 2px;
+            padding: 8px 5px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border: 1px solid var(--accent);
+            background-color: rgba(255, 0, 255, 0.1);
+            color: var(--accent);
+            cursor: pointer;
+            border-radius: 5px;
+            box-shadow: 0 0 5px var(--accent);
+            transition: all 0.2s;
+            font-family: 'Share Tech Mono', monospace; /* Apply font */
+        }
+
+        #panel-buttons button:hover:not(:disabled) {
+            background-color: rgba(255, 0, 255, 0.3);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        #panel-buttons button:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+            box-shadow: none;
+            color: #888;
+            background-color: rgba(10, 10, 10, 0.9);
+            border-color: #333;
+        }
+
+        #change-button {
+            border-color: var(--neon) !important;
+            color: var(--neon) !important;
+            background-color: rgba(0, 255, 102, 0.1) !important;
+            box-shadow: 0 0 5px var(--neon) !important;
+        }
+
+        #timer-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+            text-align: center;
+            line-height: 1.2;
+            margin-bottom: 5px; /* Space between timer and main content */
+        }
+        #periodValue30Sec {
+            font-size: 1rem; /* INCREASED FONT SIZE HERE */
+            color: rgba(0, 255, 102, 0.7);
+            text-shadow: 0 0 3px rgba(0, 255, 102, 0.5);
+            margin-bottom: 3px;
+            font-family: 'Share Tech Mono', monospace; /* Apply font */
+        }
+        #timerValue {
+            font-size: 1.3rem; /* Adjusted for better visibility */
+            font-weight: bold;
+            color: var(--neon);
+            text-shadow: 0 0 8px var(--neon);
+            font-family: 'Share Tech Mono', monospace; /* Apply font */
+        }
+
+        /* Styles for Chance button (now a non-interactive display) */
+        #chance-button {
+            flex: 1;
+            margin: 0 2px;
+            padding: 8px 5px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border: 1px solid var(--accent);
+            background-color: rgba(255, 0, 255, 0.1);
+            color: var(--accent);
+            cursor: default; /* Not clickable like other buttons */
+            border-radius: 5px;
+            box-shadow: 0 0 5px var(--accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+            font-family: 'Share Tech Mono', monospace; /* Apply font */
+        }
+
+        /* Overlay for "Device Activated Successfully" message */
+        #activation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-out;
+        }
+        #activation-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #activation-message {
+            font-size: 2.5rem;
+            color: var(--neon);
+            text-shadow: 0 0 15px var(--neon), 0 0 30px var(--neon), 0 0 45px var(--neon);
+            animation: pulse-glow 1.5s infinite ease-in-out;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <header id="top-bar">
+        <div id="brand-text">SHAHIN KING MOD</div>
+        <button id="hack-on-button" class="neon-button">OPEN HACK</button>
+    </header>
+
+    <!-- Iframe Container -->
+    <div id="iframe-container">
+        <iframe id="main-iframe" src="https://dkwin9.site/#/" allow="clipboard-read; clipboard-write"></iframe>
+    </div>
+
+    <!-- Floating Panel (Hidden by Default) -->
+    <div id="floating-panel">
+        <div id="panel-header">SHAHIN KING MOD <span style="color: yellow;">(WhatsApp 01865543868)</span></div>
+        
+        <!-- Timer Display -->
+        <div id="timer-display">
+            <span id="periodValue30Sec"></span>
+            <span id="timerValue"></span>
+        </div>
+
+        <div id="content-area">
+            <!-- Particle Canvas -->
+            <canvas id="particle-canvas"></canvas>
+
+            <!-- Countdown SVG -->
+            <svg id="countdown-svg" viewBox="0 0 120 120">
+                <!-- Background circle -->
+                <circle cx="60" cy="60" r="50" fill="transparent" stroke="rgba(255, 0, 255, 0.2)" stroke-width="4"/>
+                <!-- Foreground ring (manipulated by JS) -->
+                <circle id="ring-path" class="countdown-ring" cx="60" cy="60" r="50" stroke-dasharray="314.159" stroke-dashoffset="314.159"/>
+            </svg>
+
+            <!-- Result Display -->
+            <div id="result-display" class="result-glow">READY</div>
+        </div>
+        
+        <!-- Control Buttons -->
+        <div id="panel-buttons">
+            <div id="chance-button">
+                CHANCE: <span id="chance-count">10</span>
+            </div>
+            <button id="change-button">CHANGE</button>
+            <button id="hide-button">HIDE</button>
+        </div>
+    </div>
+
+    <!-- Activation Overlay -->
+    <div id="activation-overlay">
+        <div id="activation-message">Device Activated Successfully</div>
+    </div>
+
+    <script>
+        // Global Constants and Variables
+        const SEQUENCE = ['Small 0', 'Small 1', 'Small 2', 'Small 3', 'Small 4', 'Big 5', 'Big 6', 'Big 7', 'Big 8', 'Big 9'];
+        const COOLDOWN_TIME_S = 2;
+        const COUNTDOWN_DURATION_MS = 3000;
+        const CIRCLE_RADIUS = 50;
+        const CIRCUMFERENCE = 2 * Math.PI * CIRCLE_RADIUS;
+        const INITIAL_CHANCE = 10;
+        
+        let sequenceIndex = 0; 
+        let isPanelVisible = false;
+        let isCooldownActive = false;
+        let countdownAnimationFrame;
+        let particleAnimationFrame;
+        let chancesLeft = INITIAL_CHANCE; 
+        let lastPeriodNumber = null; 
+        let colorInterval; 
+        let hasDeviceBeenActivated = false; // New variable to track activation
+
+        // DOM Elements
+        const panel = document.getElementById('floating-panel');
+        const hackOnButton = document.getElementById('hack-on-button');
+        const changeButton = document.getElementById('change-button');
+        const hideButton = document.getElementById('hide-button');
+        const resultDisplay = document.getElementById('result-display');
+        const ringPath = document.getElementById('ring-path');
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        const chanceCountDisplay = document.getElementById('chance-count');
+        const periodValue30SecDisplay = document.getElementById('periodValue30Sec');
+        const activationOverlay = document.getElementById('activation-overlay');
+        const activationMessage = document.getElementById('activation-message'); // Get the message element
+        
+        // Draggability State
+        let isDragging = false;
+        let dragOffsetX, dragOffsetY;
+        let panelX, panelY; 
+
+        // --- Utility for random color generation ---
+        function getRandomColor() {
+            // Generate brighter, saturated colors
+            const hue = Math.floor(Math.random() * 360);
+            const saturation = '100%'; // Full saturation
+            const lightness = '60%';   // Slightly brighter lightness for more vivid colors
+            return `hsl(${hue}, ${saturation}, ${lightness})`;
+        }
+
+        function updateResultColor() {
+            const newColor = getRandomColor();
+            resultDisplay.style.color = newColor;
+            // Increased text-shadow spread and intensity for brighter glow
+            resultDisplay.style.textShadow = `0 0 20px ${newColor}, 0 0 40px ${newColor}, 0 0 60px ${newColor}`;
+        }
+
+        // --- Core Panel Control Functions ---
+
+        function showPanel() {
+            if (!isPanelVisible) {
+                panel.classList.add('visible');
+                isPanelVisible = true;
+                if (panelX === undefined) {
+                    centerPanel();
+                } else {
+                    panel.style.left = `${panelX}px`;
+                    panel.style.top = `${panelY}px`;
+                    panel.style.transform = 'none';
+                }
+                startParticleAnimation();
+                updateTimer(); 
+                updateChanceDisplay(); 
+                clearInterval(colorInterval); // Clear any existing interval
+                colorInterval = setInterval(updateResultColor, 2000); 
+                updateResultColor(); // Set initial color immediately
+            }
+        }
+
+        function hidePanel() {
+            panel.classList.remove('visible');
+            isPanelVisible = false;
+            cancelAnimationFrame(particleAnimationFrame);
+            clearInterval(colorInterval); 
+        }
+        
+        function centerPanel() {
+            const panelRect = panel.getBoundingClientRect();
+            panelX = (window.innerWidth / 2) - (panelRect.width / 2);
+            panelY = (window.innerHeight / 2) - (panelRect.height / 2);
+            panel.style.left = `${panelX}px`;
+            panel.style.top = `${panelY}px`;
+            panel.style.transform = 'none'; 
+        }
+
+        // --- Cooldown Logic ---
+
+        function startCooldown() {
+            isCooldownActive = true;
+            changeButton.disabled = true;
+            
+            let remainingTime = COOLDOWN_TIME_S;
+
+            const intervalId = setInterval(() => {
+                remainingTime--;
+                changeButton.textContent = `WAIT ${remainingTime}s`;
+
+                if (remainingTime <= 0) {
+                    clearInterval(intervalId);
+                    isCooldownActive = false;
+                    changeButton.disabled = (chancesLeft <= 0); 
+                    changeButton.textContent = 'CHANGE';
+                    if (chancesLeft === '00') { 
+                         changeButton.textContent = 'NO CHANCE';
+                    }
+                }
+            }, 1000);
+            
+            changeButton.textContent = `WAIT ${COOLDOWN_TIME_S}s`;
+        }
+        
+        // --- Countdown Animation (SVG Ring) ---
+
+        function updateCountdown(startTime) {
+            const elapsedTime = Date.now() - startTime;
+            const progress = Math.min(elapsedTime / COUNTDOWN_DURATION_MS, 1);
+            
+            const offset = CIRCUMFERENCE * (1 - progress);
+            ringPath.style.strokeDashoffset = offset;
+            ringPath.style.stroke = progress < 0.5 ? 'var(--accent)' : 'var(--neon)';
+
+            if (progress < 1) {
+                countdownAnimationFrame = requestAnimationFrame(() => updateCountdown(startTime));
+            } else {
+                ringPath.style.strokeDashoffset = CIRCUMFERENCE; 
+                displayResult();
+                startCooldown();
+            }
+        }
+
+        function displayResult() {
+            if (chancesLeft === '00') {
+                resultDisplay.textContent = 'ERROR';
+                resultDisplay.className = 'error-glow'; 
+                resultDisplay.style.color = '#ff0000'; 
+                resultDisplay.style.textShadow = '0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000'; // Even more intense error glow
+                clearInterval(colorInterval); 
+            } else {
+                const randomIndex = Math.floor(Math.random() * SEQUENCE.length);
+                const nextResult = SEQUENCE[randomIndex];
+                resultDisplay.textContent = nextResult;
+                resultDisplay.className = 'result-glow'; 
+                // The color will be set by the colorInterval function
+            }
+        }
+
+        // --- Chance Logic ---
+        function updateChanceDisplay() {
+            chanceCountDisplay.textContent = chancesLeft;
+            if (chancesLeft <= 0 || chancesLeft === '00') {
+                changeButton.disabled = true;
+                changeButton.textContent = 'NO CHANCE';
+            } else if (!isCooldownActive) { 
+                changeButton.disabled = false;
+                changeButton.textContent = 'CHANGE';
+            }
+        }
+
+        function decreaseChance() {
+            if (chancesLeft > 0) {
+                chancesLeft--;
+                updateChanceDisplay();
+            }
+            if (chancesLeft === 0) {
+                chancesLeft = '00'; 
+                updateChanceDisplay();
+            }
+        }
+
+        function handleChange() {
+            const currentPeriod = periodValue30SecDisplay.textContent;
+
+            if (isCooldownActive) {
+                return;
+            }
+
+            if (chancesLeft === '00') {
+                resultDisplay.textContent = 'ERROR';
+                resultDisplay.className = 'error-glow';
+                resultDisplay.style.color = '#ff0000'; 
+                resultDisplay.style.textShadow = '0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000';
+                changeButton.disabled = true;
+                changeButton.textContent = 'NO CHANCE';
+                clearInterval(colorInterval); 
+                return;
+            }
+
+            if (lastPeriodNumber === currentPeriod) {
+                alert("You can only get one result per 30-second period. Please wait for the next period.");
+                return;
+            }
+
+            decreaseChance(); 
+            lastPeriodNumber = currentPeriod; 
+
+            resultDisplay.textContent = 'HACKING...';
+            resultDisplay.className = ''; 
+            resultDisplay.style.color = 'var(--neon)'; 
+            resultDisplay.style.textShadow = '0 0 10px var(--neon)'; // Default glow for "HACKING..."
+            
+            const startTime = Date.now();
+            updateCountdown(startTime);
+        }
+
+        // --- Particle Canvas Background Animation ---
+        
+        const particles = [];
+        const PARTICLE_COUNT = 30;
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x || Math.random() * canvas.width;
+                this.y = y || Math.random() * canvas.height;
+                this.size = Math.random() * 1 + 0.5;
+                this.vx = Math.random() * 0.4 - 0.2; 
+                this.vy = Math.random() * 0.4 + 0.1; 
+                this.alpha = Math.random() * 0.6 + 0.2;
+                this.color = (Math.random() > 0.5) ? 'rgba(0, 255, 102, ' : 'rgba(255, 0, 255, ';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y -= this.vy; 
+
+                if (this.y < 0) this.y = canvas.height;
+                if (this.x < 0 || this.x > canvas.width) this.x = Math.random() * canvas.width;
+                
+                this.alpha -= 0.001;
+                if (this.alpha <= 0) {
+                    this.reset();
+                }
+            }
+            
+            reset() {
+                 this.x = Math.random() * canvas.width;
+                 this.y = canvas.height;
+                 this.size = Math.random() * 1 + 0.5;
+                 this.alpha = Math.random() * 0.6 + 0.2;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color + this.alpha + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function initParticles() {
+            particles.length = 0; 
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Particle());
+            }
+        }
+
+        function drawParticles() {
+            ctx.fillStyle = 'rgba(10, 0, 10, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+            }
+
+            if(isPanelVisible) {
+                 particleAnimationFrame = requestAnimationFrame(drawParticles);
+            }
+        }
+        
+        function startParticleAnimation() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            initParticles();
+            drawParticles();
+        }
+
+        // --- Draggability Implementation (Mouse & Touch) ---
+
+        function handleDragStart(e) {
+            isDragging = true;
+            panel.style.cursor = 'grabbing';
+            panel.style.zIndex = '1001'; 
+
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+            
+            const panelRect = panel.getBoundingClientRect();
+            dragOffsetX = clientX - panelRect.left;
+            dragOffsetY = clientY - panelRect.top;
+
+            panel.style.transition = 'none';
+            panel.style.transform = 'none';
+        }
+
+        function handleDragMove(e) {
+            if (!isDragging) return;
+            
+            e.preventDefault(); 
+            
+            const clientX = e.clientX || e.touches[0].clientX;
+            const clientY = e.clientY || e.touches[0].clientY;
+
+            let newX = clientX - dragOffsetX;
+            let newY = clientY - dragOffsetY;
+
+            const panelRect = panel.getBoundingClientRect();
+            const minX = 0;
+            const minY = 0;
+            const maxX = window.innerWidth - panelRect.width;
+            const maxY = window.innerHeight - panelRect.height;
+            
+            panelX = Math.max(minX, Math.min(newX, maxX));
+            panelY = Math.max(minY, Math.min(newY, maxY));
+            
+            panel.style.left = `${panelX}px`;
+            panel.style.top = `${panelY}px`;
+        }
+
+        function handleDragEnd() {
+            isDragging = false;
+            panel.style.cursor = 'grab';
+            panel.style.zIndex = '1000';
+            panel.style.transition = 'opacity 0.2s, box-shadow 0.2s, border 0.2s'; 
+        }
+
+        // --- Timer Functionality ---
+        function updateTimer() {
+            const now = new Date();
+            
+            const utcSeconds = now.getUTCSeconds();
+            const utcMinutes = now.getUTCMinutes();
+            const utcHours = now.getUTCHours();
+            
+            const remainingSeconds = utcSeconds < 30 ? (30 - utcSeconds) : (60 - utcSeconds);
+            
+            const year = now.getUTCFullYear();
+            const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+            const day = String(now.getUTCDate()).padStart(2, '0');
+            const dateStr = `${year}${month}${day}`;
+            
+            const total30SecPeriods = utcHours * 120 + utcMinutes * 2 + (utcSeconds >= 30 ? 1 : 0);
+            const periodNumber30Sec = 10001 + total30SecPeriods;
+            
+            const currentPeriodIdentifier = dateStr + "3000" + periodNumber30Sec;
+            periodValue30SecDisplay.textContent = currentPeriodIdentifier;
+
+            if (lastPeriodNumber !== currentPeriodIdentifier && lastPeriodNumber !== null) {
+                lastPeriodNumber = null;
+            }
+
+            const formattedTime = `   ${String(0).padStart(2, '0')}  :  ${String(remainingSeconds).padStart(2, '0')}`
+                .replace(/(\d)(?=\d)/g, '$1 ');
+            document.getElementById('timerValue').textContent = formattedTime;
+        }
+        
+        // --- Event Listeners ---
+        
+        hackOnButton.addEventListener('click', () => {
+            if (!hasDeviceBeenActivated) {
+                activationOverlay.classList.add('active');
+                activationMessage.textContent = "Device Activated Successfully"; // First message
+                setTimeout(() => {
+                    activationMessage.textContent = "Server Connected Successfully"; // Second message
+                    setTimeout(() => {
+                        activationOverlay.classList.remove('active');
+                        showPanel();
+                        hasDeviceBeenActivated = true;
+                    }, 1500); // Display "Server Connected" for 1.5 seconds
+                }, 2000); // Display "Device Activated" for 2 seconds
+            } else {
+                showPanel();
+            }
+        });
+
+        hideButton.addEventListener('click', hidePanel);
+        
+        changeButton.addEventListener('click', handleChange);
+        
+        panel.addEventListener('mousedown', handleDragStart);
+        document.addEventListener('mousemove', handleDragMove);
+        document.addEventListener('mouseup', handleDragEnd);
+        
+        panel.addEventListener('touchstart', (e) => handleDragStart(e), { passive: false });
+        document.addEventListener('touchmove', (e) => handleDragMove(e), { passive: false });
+        document.addEventListener('touchend', handleDragEnd);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && isPanelVisible) {
+                hidePanel();
+            }
+        });
+
+        window.onload = function() {
+            ringPath.style.strokeDasharray = CIRCUMFERENCE;
+            ringPath.style.strokeDashoffset = CIRCUMFERENCE;
+            
+            centerPanel();
+            
+            setInterval(() => {
+                if (isPanelVisible) {
+                    updateTimer();
+                }
+            }, 1000);
+
+            updateChanceDisplay(); 
+        };
+
+        window.addEventListener('resize', () => {
+             if (isPanelVisible) {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                initParticles();
+                
+                const panelRect = panel.getBoundingClientRect();
+                const minX = 0;
+                const minY = 0;
+                const maxX = window.innerWidth - panelRect.width;
+                const maxY = window.innerHeight - panelRect.height;
+
+                panelX = Math.max(minX, Math.min(panelX || (window.innerWidth / 2) - (panelRect.width / 2), maxX));
+                panelY = Math.max(minY, Math.min(panelY || (window.innerHeight / 2) - (panelRect.height / 2), maxY));
+
+                panel.style.left = `${panelX}px`;
+                panel.style.top = `${panelY}px`;
+            }
+        });
+
+    </script>
+</body>
+</html>
